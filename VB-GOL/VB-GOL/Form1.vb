@@ -171,6 +171,8 @@ Public Class Form1
                 If (mUniverse(i, j).IsAlive) Then
                     e.Graphics.FillRectangle(b, iOff - mGrid.RectWidth, jOff - mGrid.RectHeight, mGrid.RectWidth, mGrid.RectHeight)
                 End If
+
+                b.Dispose()
             Next
         Next
 
