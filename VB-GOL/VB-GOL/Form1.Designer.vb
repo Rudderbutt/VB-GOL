@@ -107,7 +107,7 @@ Partial Class Form1
         Me.SaveToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.SaveToolStripButton.Name = "SaveToolStripButton"
         Me.SaveToolStripButton.Size = New System.Drawing.Size(23, 22)
-        Me.SaveToolStripButton.Text = "ToolStripButton4"
+        Me.SaveToolStripButton.Text = "Save"
         '
         'ToolStripSeparator4
         '
@@ -235,26 +235,26 @@ Partial Class Form1
         '
         Me.ClearToolStripMenuItem.Name = "ClearToolStripMenuItem"
         Me.ClearToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.C), System.Windows.Forms.Keys)
-        Me.ClearToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.ClearToolStripMenuItem.Size = New System.Drawing.Size(176, 22)
         Me.ClearToolStripMenuItem.Text = "&Clear"
         '
         'OptionsToolStripMenuItem
         '
         Me.OptionsToolStripMenuItem.Name = "OptionsToolStripMenuItem"
         Me.OptionsToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.P), System.Windows.Forms.Keys)
-        Me.OptionsToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.OptionsToolStripMenuItem.Size = New System.Drawing.Size(176, 22)
         Me.OptionsToolStripMenuItem.Text = "&Preferences"
         '
         'ToolStripSeparator5
         '
         Me.ToolStripSeparator5.Name = "ToolStripSeparator5"
-        Me.ToolStripSeparator5.Size = New System.Drawing.Size(177, 6)
+        Me.ToolStripSeparator5.Size = New System.Drawing.Size(173, 6)
         '
         'ResetToolStripMenuItem
         '
         Me.ResetToolStripMenuItem.Name = "ResetToolStripMenuItem"
         Me.ResetToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.R), System.Windows.Forms.Keys)
-        Me.ResetToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
+        Me.ResetToolStripMenuItem.Size = New System.Drawing.Size(176, 22)
         Me.ResetToolStripMenuItem.Text = "&Reset"
         '
         'StatusStrip1
