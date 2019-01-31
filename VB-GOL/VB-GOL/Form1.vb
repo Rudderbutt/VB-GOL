@@ -312,7 +312,7 @@ Public Class Form1
         mGrid = New Grid(mL, mH)
         ToolStripStatusLabel1.Text = "Generations: " + mGenerations.ToString
         ToolStripStatusLabel2.Text = "Interval: " + mTime.ToString
-        ToolStripStatusLabel3.Text = "Living Cells: " + mAlive.ToString
+        ToolStripStatusLabel3.Text = "Living Cells: 0"
         time.Enabled = False
         PauseToolStripButton.Enabled = False
         PlayToolStripButton.Enabled = True
