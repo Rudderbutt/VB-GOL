@@ -199,9 +199,7 @@ Public Class Form1
 
         mStream = New FileStream(files(fRand.Next(files.Length)), FileMode.Open)
 
-        NewToolStripButton_Click(sender, e)
-
-        ReadFile(mStream)
+        ReadFile(mStream, False, sender, e)
 
         mUniverse = mScratchpad
         ToolStripStatusLabel3.Text = "Living Cells: " + mAlive.ToString
@@ -209,7 +207,7 @@ Public Class Form1
         GraphicsPanel1.Invalidate()
     End Sub
 
-    Private Sub ReadFile(stream As FileStream)
+    Private Sub ReadFile(stream As FileStream, newGrid As Boolean, sender As Object, e As EventArgs)
         Dim fReader As New StreamReader(mStream)
         Dim nLine = 0, nRow = 0, hRowOffset = 0, hStartOffset = 0
 
@@ -226,6 +224,13 @@ Public Class Form1
         mAlive = 0
         fReader.DiscardBufferedData()
         fReader.BaseStream.Seek(0, SeekOrigin.Begin)
+
+        If newGrid Then
+            mL = hRowOffset - 1
+            mH = hStartOffset
+        End If
+
+        NewToolStripButton_Click(sender, e)
 
         While Not fReader.EndOfStream
             Dim line As String = fReader.ReadLine()
@@ -251,7 +256,7 @@ Public Class Form1
                             mAlive += 1
                     End Select
                 Catch ex As IndexOutOfRangeException
-                    MessageBox.Show(("IndexOutOfRangeException: Grid is too small!\n" + "Your grid size is: " + mL.ToString + ", " + mH.ToString + "\nIt should be larger than " + hRowOffset.ToString + ", " + hStartOffset.ToString), "Error: IndexOutOfRange", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
+                    MessageBox.Show(("IndexOutOfRangeException: Grid is too small!" + Environment.NewLine + "Your grid size is: " + mL.ToString + ", " + mH.ToString + Environment.NewLine + "It should be larger than " + hRowOffset.ToString + ", " + hStartOffset.ToString), "Error: IndexOutOfRange", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
                     Exit While
                 End Try
             Next
@@ -260,6 +265,30 @@ Public Class Form1
 
         fReader.Close()
         stream.Close()
+    End Sub
+
+    Private Sub RunToolStripButton_Click(sender As Object, e As EventArgs) Handles RunToolStripButton.Click
+        Dim toGeneration As New ToGeneration()
+
+        If (toGeneration.ShowDialog() = DialogResult.OK) Then
+
+            FileToolStripMenuItem.Enabled = False
+            ToolStrip1.Enabled = False
+
+            Dim curGen = mGenerations, finGen = (curGen + toGeneration.GetGeneration())
+
+            Dim thread As New Threading.Thread(
+                Sub()
+                    For i = curGen To finGen - 1
+                        Time_Tick(sender, e)
+                    Next
+                End Sub)
+            thread.Start()
+            thread.Join()
+
+            FileToolStripMenuItem.Enabled = True
+            ToolStrip1.Enabled = True
+        End If
     End Sub
 
     Private Sub NewToolStripButton_Click(sender As Object, e As EventArgs) Handles NewToolStripButton.Click
@@ -290,6 +319,140 @@ Public Class Form1
         StepToolStripButton.Enabled = True
 
         GraphicsPanel1.Invalidate()
+    End Sub
+
+    Private Sub OpenToolStripButton_Click(sender As Object, e As EventArgs) Handles OpenToolStripButton.Click
+        Dim filepath = Application.StartupPath
+
+        Dim open As New OpenFileDialog()
+        open.InitialDirectory = filepath
+        open.Filter = "*.CELLS Files|*.cells|*.* All Files|*.*"
+
+        If (open.ShowDialog() = DialogResult.OK) Then
+            If Not (open.FileName.Contains(".cells")) Then
+                MessageBox.Show("Error: Invalid File Type" + Environment.NewLine + "The file you tried to open was not valid.", "Invalid File", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Return
+            End If
+
+            mStream = New FileStream(open.FileName, FileMode.Open)
+            ReadFile(mStream, True, sender, e)
+
+            mUniverse = mScratchpad
+            ToolStripStatusLabel3.Text = "Living Cells: " + mAlive.ToString
+
+            GraphicsPanel1.Invalidate()
+        End If
+    End Sub
+
+    Private Sub ClearToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ClearToolStripMenuItem.Click
+        NewToolStripButton_Click(sender, e)
+    End Sub
+
+    Private Sub OptionsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OptionsToolStripMenuItem.Click
+        Dim preferences As New Preferences()
+
+        preferences.SetValues(mTime, mL, mH, mGrid.Color, GraphicsPanel1.BackColor, mUniverse(0, 0).Color, mFinite)
+
+        If (preferences.ShowDialog() = DialogResult.OK) Then
+            mTime = preferences.Interval()
+            mFinite = preferences.UniverseType()
+            mGrid.Color = preferences.GridColor()
+            GraphicsPanel1.BackColor = preferences.BackgoundColor()
+
+            If (Not (preferences.UniverseWidth() = mL)) Or (Not (preferences.UniverseHeight() = mH)) Then
+                mL = preferences.UniverseWidth()
+                mH = preferences.UniverseHeight()
+
+                NewToolStripButton_Click(sender, e)
+            End If
+
+            For i As Integer = 0 To mUniverse.GetLength(0) - 1
+                For j As Integer = 0 To mUniverse.GetLength(1) - 1
+                    mUniverse(i, j).Color = preferences.CellColor()
+                    mScratchpad(i, j).Color = preferences.CellColor()
+                Next
+            Next
+
+        End If
+    End Sub
+
+    Private Sub ResetToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ResetToolStripMenuItem.Click
+        mL = 100
+        mH = 100
+        NewToolStripButton_Click(sender, e)
+    End Sub
+
+    Private Sub ImportToolStripButton_Click(sender As Object, e As EventArgs) Handles ImportToolStripButton.Click
+        Dim filepath = Application.StartupPath
+
+        Dim open As New OpenFileDialog()
+        open.InitialDirectory = filepath
+        open.Filter = "*.CELLS Files|*.cells|*.* All Files|*.*"
+
+        If (open.ShowDialog() = DialogResult.OK) Then
+            If Not (open.FileName.Contains(".cells")) Then
+                MessageBox.Show("Error: Invalid File Type" + Environment.NewLine + "The file you tried to open was not valid.", "Invalid File", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Return
+            End If
+
+            mStream = New FileStream(open.FileName, FileMode.Open)
+            ReadFile(mStream, False, sender, e)
+
+            mUniverse = mScratchpad
+            ToolStripStatusLabel3.Text = "Living Cells: " + mAlive.ToString
+
+            GraphicsPanel1.Invalidate()
+        End If
+    End Sub
+
+    Private Sub SaveToolStripButton_Click(sender As Object, e As EventArgs) Handles SaveToolStripButton.Click
+        Dim filepath = Application.StartupPath
+
+        Dim save As New SaveFileDialog()
+        save.Filter = "*.CELLS File|*.cells|*.* All Files|*.*"
+        save.InitialDirectory = filepath
+
+        If (save.ShowDialog() = DialogResult.OK) Then
+            mStream = New FileStream(save.FileName, FileMode.Create)
+            Dim writer As New StreamWriter(mStream)
+
+            writer.WriteLine("!Name: " + Path.GetFileNameWithoutExtension(save.FileName))
+            writer.WriteLine("!")
+
+            For i As Integer = 0 To mUniverse.GetLength(1) - 1
+                Dim line As String = String.Empty
+                For j As Integer = 0 To mUniverse.GetLength(0) - 1
+                    If mUniverse(j, i).IsAlive Then
+                        line += "O"
+                    Else
+                        line += "."
+                    End If
+                Next
+                writer.WriteLine(line)
+            Next
+            writer.Close()
+            mStream.Close()
+        End If
+    End Sub
+
+    Private Sub NewToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles NewToolStripMenuItem.Click
+        NewToolStripButton_Click(sender, e)
+    End Sub
+
+    Private Sub OpenToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenToolStripMenuItem.Click
+        OpenToolStripButton_Click(sender, e)
+    End Sub
+
+    Private Sub ImportToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ImportToolStripMenuItem.Click
+        ImportToolStripButton_Click(sender, e)
+    End Sub
+
+    Private Sub SaveToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveToolStripMenuItem.Click
+        SaveToolStripButton_Click(sender, e)
+    End Sub
+
+    Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
+        Application.Exit()
     End Sub
 
 End Class
